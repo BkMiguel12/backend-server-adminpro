@@ -79,6 +79,7 @@ app.put('/:id', mdAuth.verifyToken, (req, res) => {
         }
 
         doctor.name = body.name;
+        doctor.user = req.user._id;
         doctor.hospital = body.hospital;
 
         doctor.save((err, updatedDoctor) => {

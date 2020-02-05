@@ -78,6 +78,7 @@ app.put('/:id', mdAuth.verifyToken, (req, res) => {
         }
 
         hospital.name = body.name;
+        hospital.user = req.user._id
 
         hospital.save((err, updatedHospital) => {
             if(err) {
