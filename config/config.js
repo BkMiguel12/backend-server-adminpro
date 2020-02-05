@@ -1,0 +1,1 @@
+module.exports.SEED = 'Ultra-secret-S33d-M1gu3l';
