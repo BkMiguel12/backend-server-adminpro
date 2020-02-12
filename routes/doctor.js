@@ -9,20 +9,45 @@ var mdAuth = require('../middlewares/auth');
 // ============ GET all doctors ==============
 // ===========================================
 app.get('/', (req, res) => {
-    Doctor.find({}, (err, doctors) => {
-        if(err) {
-            return res.status(500).json({
-                ok: false,
-                message: 'Error encontrando los doctores',
-                errors: err
+
+    var from = req.query.from || 0;
+    var total = req.query.total || 5;
+
+    from = Number(from);
+    total = Number(total);
+
+    Doctor.find({})
+    .skip(from)
+    .limit(total)
+    .populate('user', 'name email')
+    .populate('hospital', 'name')
+    .exec(
+        (err, doctors) => {
+            if(err) {
+                return res.status(500).json({
+                    ok: false,
+                    message: 'Error encontrando los doctores',
+                    errors: err
+                });
+            }
+
+            Doctor.countDocuments({}, (err, counter) => {
+                if(err) {
+                    return res.status(500).json({
+                        ok: false,
+                        message: 'Error en el contador',
+                        errors: err
+                    });
+                }
+
+                res.status(200).json({
+                    ok: true,
+                    doctors: doctors,
+                    total: counter
+                });
             });
         }
-
-        res.status(200).json({
-            ok: true,
-            doctors: doctors
-        });
-    });
+    );
 });
 
 // ===========================================

@@ -12,7 +12,15 @@ var User = require('../models/user');
 // ===========================================
 app.get('/', (req, res, next) => {
 
+    var from = req.query.from || 0;
+    var total = req.query.total || 5;
+
+    from = Number(from);
+    total = Number(total);
+
     User.find({}, 'name email image role')
+        .skip(from)
+        .limit(total)
         .exec(
             (err, users) => {
                 if(err) {
@@ -23,9 +31,20 @@ app.get('/', (req, res, next) => {
                     });
                 }
 
-                res.status(200).json({
-                    ok: true,
-                    users: users
+                User.countDocuments({}, (err, counter) => {
+                    if(err) {
+                        return res.status(500).json({
+                            ok: false,
+                            message: 'Error en el contador',
+                            errors: err
+                        });
+                    }
+
+                    res.status(200).json({
+                        ok: true,
+                        users: users,
+                        total: counter
+                    });
                 });
             }
         );

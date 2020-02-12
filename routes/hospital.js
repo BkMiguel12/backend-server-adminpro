@@ -9,20 +9,43 @@ var Hospital = require('../models/hospital');
 // =========== GET all hospitals =============
 // ===========================================
 app.get('/', (req, res) => {
-    Hospital.find({}, (err, hospitals) => {
-        if(err) {
-            return res.status(500).json({
-                ok: false,
-                message: 'Error buscando los hospitales',
-                errors: err
-            });
-        }
+    var from = req.query.from || 0;
+    var total = req.query.total || 5;
 
-        res.status(200).json({
-            ok: true,
-            hospitals: hospitals
-        });
-    });
+    from = Number(from);
+    total = Number(total);
+
+    Hospital.find({})
+        .skip(from)
+        .limit(total)
+        .populate('user', 'name email') 
+        .exec(
+            (err, hospitals) => {
+                if(err) {
+                    return res.status(500).json({
+                        ok: false,
+                        message: 'Error buscando los hospitales',
+                        errors: err
+                    });
+                }
+
+                Hospital.countDocuments({}, (err, counter) => {
+                    if(err) {
+                        return res.status(500).json({
+                            ok: false,
+                            message: 'Error en el contador',
+                            errors: err
+                        });
+                    }
+
+                    res.status(200).json({
+                        ok: true,
+                        hospitals: hospitals,
+                        total: counter
+                    });
+                })
+            }
+        );
 });
 
 // ===========================================
