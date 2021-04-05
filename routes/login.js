@@ -62,7 +62,7 @@ app.post('/google', async (req, res) => {
                     message: 'Debe usar la autenticación normal'
                 });
             } else {
-                userMatch.password = '';
+                userDb.password = '';
                 var token = jwt.sign({user: userDb}, config.SEED, {expiresIn: 14400});
 
                 res.status(200).json({
