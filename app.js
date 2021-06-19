@@ -2,6 +2,7 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
+var cors = require('cors');
 
 // Init vars
 var app = express();
@@ -10,6 +11,7 @@ var app = express();
 // parse application/x-www-form-urlencoded & application/json
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cors());
 
 // Import Routes
 var appRoutes = require('./routes/app');
