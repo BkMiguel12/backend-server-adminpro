@@ -17,6 +17,12 @@ var userSchema = new Schema({
     google: { type: Boolean, default: false }
 });
 
+userSchema.method('toJSON', function() {
+    const { __v, _id, ...object } = this.toObject();
+    object.uid = _id;
+    return object;
+});
+
 userSchema.plugin(uniqueValidator, {message: 'El campo {PATH} debe ser único'});
 
 module.exports = mongoose.model('User', userSchema);
