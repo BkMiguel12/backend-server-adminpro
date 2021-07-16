@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
+const { generateJWT } = require('../helpers/jwt');
 
 // ===========================================
 // ============== GET users ==============
@@ -67,7 +68,7 @@ const postUser = async (req, res) => {
         role: body.role
     });
 
-    user.save((err, userSaved) => {
+    user.save(async (err, userSaved) => {
         if(err) {
             return res.status(400).json({
                 ok: false,
@@ -76,10 +77,12 @@ const postUser = async (req, res) => {
             });
         }
 
+        const token = await generateJWT(userSaved.id);
+
         res.status(201).json({
             ok: true,
-            user: userSaved ,
-            userToken: req.user
+            user: userSaved,
+            token
         });
     });
 }
@@ -142,7 +145,7 @@ const deleteUser = async (req, res) => {
         const dbUser = await User.findById(id);
 
         if(!dbUser) {
-            res.status(400).json({
+            return res.status(400).json({
                 ok: false,
                 msg: 'No se ha encontrado ningun usuario'
             })
@@ -157,7 +160,7 @@ const deleteUser = async (req, res) => {
 
     } catch(err) {
         console.log(err);
-        res.status(500).json({
+        return res.status(500).json({
             ok: false,
             msg: 'Ha ocurrido un error inesperado!'
         });
