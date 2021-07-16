@@ -1,17 +1,18 @@
 const { Router } = require('express');
 const router = Router();
 
-const mdAuth = require('../middlewares/auth');
 const { check } = require('express-validator');
 const { validateFields } = require('../middlewares/fieldsValidator');
+const { validateJWT } = require('../middlewares/auth');
 
 const { getUsers, postUser, putUser, deleteUser } = require('../controllers/users.controller');
 
 // GET Users
-router.get('/', getUsers);
+router.get('/', validateJWT, getUsers);
 
 // POST user
 router.post('/', [
+    validateJWT,
     check('name', 'El campo NOMBRE es requerido').notEmpty(),
     check('password', 'El campo PASSWORD es requerido').notEmpty(),
     check('email', 'El campo EMAIL es requerido').isEmail(),
@@ -20,13 +21,13 @@ router.post('/', [
 
 // PUT user
 router.put('/:id', [
-    mdAuth.verifyToken,
+    validateJWT,
     check('name', 'El campo NOMBRE es requerido').notEmpty(),
     check('email', 'El campo EMAIL es requerido').isEmail(),
     validateFields
 ], putUser);
 
 // DELETE user
-router.delete('/:id', mdAuth.verifyToken, deleteUser);
+router.delete('/:id', validateJWT, deleteUser);
 
 module.exports = router;

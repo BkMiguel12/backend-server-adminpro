@@ -2,7 +2,6 @@ var express = require('express');
 
 var app = express();
 
-var mdAuth = require('../middlewares/auth');
 var Hospital = require('../models/hospital');
 
 // ===========================================
@@ -51,7 +50,7 @@ app.get('/', (req, res) => {
 // ===========================================
 // ======= POST - Create new Hospital ========
 // ===========================================
-app.post('/', mdAuth.verifyToken, (req, res) => {
+app.post('/', (req, res) => {
     var body = req.body;
 
     var hospital = new Hospital({
@@ -79,7 +78,7 @@ app.post('/', mdAuth.verifyToken, (req, res) => {
 // ===========================================
 // ========== PUT - Edit Hospital ============
 // ===========================================
-app.put('/:id', mdAuth.verifyToken, (req, res) => {
+app.put('/:id', (req, res) => {
     var id = req.params.id;
     var body = req.body;
 

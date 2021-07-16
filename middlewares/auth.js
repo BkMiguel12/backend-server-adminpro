@@ -5,20 +5,31 @@ var config = require('../config/config');
 // ============== Verify Token ===============
 // ===========================================
 
-exports.verifyToken = function(req, res, next) {
-    var token = req.query.token;
+const validateJWT = (req, res, next) => {
+    const token = req.header('x-token');
 
-    jwt.verify(token, config.SEED, (err, decoded) => {
-        if(err) {
-            return res.status(401).json({
-                ok: false,
-                message: 'Token no válido',
-                errors: err
-            });
-        }
+    if(!token) {
+        return res.status(401).json({
+            ok: false,
+            msg: 'No existe token'
+        });
+    }
 
-        req.user = decoded.user;
-
+    try {
+        
+        const { uid } = jwt.verify(token, process.env.JWT_SECRET); 
         next();
-    })
+
+    } catch(err) {
+        console.log(err);
+        return res.status(401).json({
+            ok: false,
+            msg: 'El token no es válido'
+        });
+    }
+}
+
+
+module.exports = {
+    validateJWT
 }

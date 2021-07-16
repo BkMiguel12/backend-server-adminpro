@@ -3,7 +3,6 @@ var express = require('express');
 var app = express();
 
 var Doctor = require('../models/doctor');
-var mdAuth = require('../middlewares/auth');
 
 // ===========================================
 // ============ GET all doctors ==============
@@ -53,7 +52,7 @@ app.get('/', (req, res) => {
 // ===========================================
 // ======= POST - Create a new doctor ========
 // ===========================================
-app.post('/', mdAuth.verifyToken, (req, res) => {
+app.post('/', (req, res) => {
     var body = req.body;
 
     var doctor = new Doctor({
@@ -82,7 +81,7 @@ app.post('/', mdAuth.verifyToken, (req, res) => {
 // ===========================================
 // ========== PUT - Edit a Doctor ============
 // ===========================================
-app.put('/:id', mdAuth.verifyToken, (req, res) => {
+app.put('/:id', (req, res) => {
     var id = req.params.id;
     var body = req.body;
 
@@ -128,7 +127,7 @@ app.put('/:id', mdAuth.verifyToken, (req, res) => {
 // ===========================================
 // ============ DELETE a doctor ==============
 // ===========================================
-app.delete('/:id', mdAuth.verifyToken, (req, res) => {
+app.delete('/:id', (req, res) => {
     var id = req.params.id;
 
     Doctor.findByIdAndRemove(id, (err, deletedDoctor) => {
