@@ -1,157 +1,22 @@
-var express = require('express');
+const { Router } = require('express');
+const router = Router();
 
-var app = express();
+const { check } = require('express-validator');
+const { validateFields } = require('../middlewares/fieldsValidator');
+const { validateJWT } = require('../middlewares/auth');
 
-var Doctor = require('../models/doctor');
+const { getDoctors, createDoctor, editDoctor, deleteDoctor } = require('../controllers/doctor.controller');
 
-// ===========================================
-// ============ GET all doctors ==============
-// ===========================================
-app.get('/', (req, res) => {
+// Get doctors
+router.get('/', [], getDoctors);
 
-    var from = req.query.from || 0;
-    var total = req.query.total || 5;
+// Create doctor
+router.post('/', [], createDoctor);
 
-    from = Number(from);
-    total = Number(total);
+// Edit doctor
+router.put('/:id', [], editDoctor);
 
-    Doctor.find({})
-    .skip(from)
-    .limit(total)
-    .populate('user', 'name email')
-    .populate('hospital', 'name')
-    .exec(
-        (err, doctors) => {
-            if(err) {
-                return res.status(500).json({
-                    ok: false,
-                    message: 'Error encontrando los doctores',
-                    errors: err
-                });
-            }
+// Delete doctor
+router.delete('/:id', [], deleteDoctor);
 
-            Doctor.countDocuments({}, (err, counter) => {
-                if(err) {
-                    return res.status(500).json({
-                        ok: false,
-                        message: 'Error en el contador',
-                        errors: err
-                    });
-                }
-
-                res.status(200).json({
-                    ok: true,
-                    doctors: doctors,
-                    total: counter
-                });
-            });
-        }
-    );
-});
-
-// ===========================================
-// ======= POST - Create a new doctor ========
-// ===========================================
-app.post('/', (req, res) => {
-    var body = req.body;
-
-    var doctor = new Doctor({
-        name: body.name,
-        image: null,
-        user: req.user._id,
-        hospital: body.hospital
-    });
-
-    doctor.save((err, savedDoctor) => {
-        if(err) {
-            return res.status(400).json({
-                ok: false,
-                message: 'Error encontrando los hospitales',
-                errors: err
-            });
-        }
-
-        res.status(201).json({
-            ok: true,
-            doctor: savedDoctor
-        });
-    })
-});
-
-// ===========================================
-// ========== PUT - Edit a Doctor ============
-// ===========================================
-app.put('/:id', (req, res) => {
-    var id = req.params.id;
-    var body = req.body;
-
-    Doctor.findById(id, (err, doctor) => {
-        if(err) {
-            return res.status(500).json({
-                ok: false,
-                message: 'Error encontrando el doctor',
-                errors: err
-            });
-        }
-
-        if(!doctor) {
-            return res.status(400).json({
-                ok: false,
-                message: 'Error encontrando el doctor',
-                errors: {message: 'El doctor con el ID: ' + id + ' no existe'}
-            });
-        }
-
-        doctor.name = body.name;
-        doctor.user = req.user._id;
-        doctor.hospital = body.hospital;
-
-        doctor.save((err, updatedDoctor) => {
-            if(err) {
-                return res.status(500).json({
-                    ok: false,
-                    message: 'Error actualizando el doctor',
-                    errors: err
-                });
-            }
-
-            res.status(200).json({
-                ok: true,
-                doctor: updatedDoctor
-            });
-        });
-
-    });
-});
-
-// ===========================================
-// ============ DELETE a doctor ==============
-// ===========================================
-app.delete('/:id', (req, res) => {
-    var id = req.params.id;
-
-    Doctor.findByIdAndRemove(id, (err, deletedDoctor) => {
-        if(err) {
-            return res.status(500).json({
-                ok: false,
-                message: 'Error borrando doctor',
-                errors: err
-            });
-        }
-
-        if(!deletedDoctor) {
-            return res.status(400).json({
-                ok: false,
-                message: 'Error encontrando el doctor',
-                errors: {message: 'El doctor con el ID: ' + id + ' no existe'}
-            });
-        }
-
-        res.status(200).json({
-            ok: true,
-            doctor: deletedDoctor
-        });
-    });
-});
-
-module.exports = app;
+module.exports = router;
