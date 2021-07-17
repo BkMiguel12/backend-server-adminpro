@@ -11,7 +11,11 @@ const { getHospitals, createHospital, editHospital, deleteHospital } = require('
 router.get('/', [], getHospitals);
 
 // Create hospital
-router.post('/', [], createHospital);
+router.post('/', [
+    validateJWT,
+    check('name', 'El nombre del hospital es mecesario').notEmpty(),
+    validateFields
+], createHospital);
 
 // Edit hospital
 router.put('/:id', [], editHospital);

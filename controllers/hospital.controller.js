@@ -46,29 +46,30 @@ const getHospitals = (req, res) => {
 // ===========================================
 // ======= POST - Create new Hospital ========
 // ===========================================
-const createHospital = (req, res) => {
+const createHospital = async (req, res) => {
     const body = req.body;
-
+    const { uid } = req;
+    
     const hospital = new Hospital({
-        name: body.name,
-        image: null,
-        user: req.user._id
+        user: uid,
+        ...body
     });
 
-    hospital.save((err, hospitalSaved) => {
-        if(err) {
-            return res.status(400).json({
-                ok: false,
-                message: 'Error creando usuario',
-                errors: err
-            });
-        }
+    try {
+        const savedHospital = await hospital.save();
 
-        res.status(201).json({
+        res.json({
             ok: true,
-            hospital: hospitalSaved
+            hospital: savedHospital
         });
-    });
+
+    } catch(err) {
+        console.log(err);
+        return res.status(500).json({
+            ok: false,
+            msg: "ha ocurrido un error inesperado"
+        });
+    }
 }
 
 // ===========================================
