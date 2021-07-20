@@ -48,30 +48,30 @@ const getDoctors = (req, res) => {
 // ===========================================
 // ======= POST - Create a new doctor ========
 // ===========================================
-const createDoctor = (req, res) => {
-    var body = req.body;
+const createDoctor = async (req, res) => {
+    const body = req.body;
+    const { uid } = req;
 
-    var doctor = new Doctor({
-        name: body.name,
-        image: null,
-        user: req.user._id,
-        hospital: body.hospital
+    const doctor = new Doctor({
+        user: uid,
+        ...body
     });
 
-    doctor.save((err, savedDoctor) => {
-        if(err) {
-            return res.status(400).json({
-                ok: false,
-                message: 'Error encontrando los hospitales',
-                errors: err
-            });
-        }
+    try {
+        const savedDoctor = await doctor.save();
 
-        res.status(201).json({
+        res.json({
             ok: true,
             doctor: savedDoctor
         });
-    })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            ok: false,
+            msg: "Ha ocurrido un error inesperado"
+        });
+    }
 }
 
 // ===========================================

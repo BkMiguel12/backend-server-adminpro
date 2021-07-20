@@ -13,7 +13,7 @@ router.get('/', [], getHospitals);
 // Create hospital
 router.post('/', [
     validateJWT,
-    check('name', 'El nombre del hospital es mecesario').notEmpty(),
+    check('name', 'El nombre del hospital es requerido').notEmpty(),
     validateFields
 ], createHospital);
 

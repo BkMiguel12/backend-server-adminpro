@@ -11,7 +11,12 @@ const { getDoctors, createDoctor, editDoctor, deleteDoctor } = require('../contr
 router.get('/', [], getDoctors);
 
 // Create doctor
-router.post('/', [], createDoctor);
+router.post('/', [
+    validateJWT,
+    check('name', 'EL nombre del doctor es requerido').notEmpty(),
+    check('hospital', 'EL ID del hospital debe ser válido').isMongoId(),
+    validateFields
+], createDoctor);
 
 // Edit doctor
 router.put('/:id', [], editDoctor);
