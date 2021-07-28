@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
+const { updateImage } = require('../helpers/update-img');
 
 const uploadFile = (req, res) => {
     const type = req.params.type;
@@ -50,6 +51,9 @@ const uploadFile = (req, res) => {
                 msg: "Ha ocurrido un error al mover la imagen"
             })
         }
+
+        // Update DB
+        updateImage(type, id, fileName);
     
         res.json({
             ok: true,
