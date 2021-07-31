@@ -3,7 +3,6 @@ require('dotenv').config();
 
 const express = require('express');
 const { dbConnection } = require('./database/config');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 
 // Init vars
@@ -14,11 +13,14 @@ dbConnection();
 
 // Body Parser config
 // parse application/x-www-form-urlencoded & application/json
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 // CORS
 app.use(cors());
+
+// Public Directory
+app.use(express.static('public'))
 
 // Import Routes
 const appRoutes = require('./routes/app');
