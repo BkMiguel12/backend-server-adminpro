@@ -3,44 +3,61 @@ const Hospital = require('../models/hospital');
 // ===========================================
 // =========== GET all hospitals =============
 // ===========================================
-const getHospitals = (req, res) => {
-    var from = req.query.from || 0;
-    var total = req.query.total || 5;
+const getHospitals = async (req, res) => {
 
-    from = Number(from);
-    total = Number(total);
+    try {
+        const hospitals = 
+            await Hospital.find()
+                          .populate('user', 'name image');
 
-    Hospital.find({})
-        .skip(from)
-        .limit(total)
-        .populate('user', 'name email') 
-        .exec(
-            (err, hospitals) => {
-                if(err) {
-                    return res.status(500).json({
-                        ok: false,
-                        message: 'Error buscando los hospitales',
-                        errors: err
-                    });
-                }
+        res.json({
+            ok: true,
+            hospitals
+        })
+        
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            msg: "Ha ocurrido un error inesperado"
+        })
+    }
+    // var from = req.query.from || 0;
+    // var total = req.query.total || 5;
 
-                Hospital.countDocuments({}, (err, counter) => {
-                    if(err) {
-                        return res.status(500).json({
-                            ok: false,
-                            message: 'Error en el contador',
-                            errors: err
-                        });
-                    }
+    // from = Number(from);
+    // total = Number(total);
 
-                    res.status(200).json({
-                        ok: true,
-                        hospitals: hospitals,
-                        total: counter
-                    });
-                })
-            }
-        );
+    // Hospital.find({})
+    //     .skip(from)
+    //     .limit(total)
+    //     .populate('user', 'name email') 
+    //     .exec(
+    //         (err, hospitals) => {
+    //             if(err) {
+    //                 return res.status(500).json({
+    //                     ok: false,
+    //                     message: 'Error buscando los hospitales',
+    //                     errors: err
+    //                 });
+    //             }
+
+    //             Hospital.countDocuments({}, (err, counter) => {
+    //                 if(err) {
+    //                     return res.status(500).json({
+    //                         ok: false,
+    //                         message: 'Error en el contador',
+    //                         errors: err
+    //                     });
+    //                 }
+
+    //                 res.status(200).json({
+    //                     ok: true,
+    //                     hospitals: hospitals,
+    //                     total: counter
+    //                 });
+    //             })
+    //         }
+    //     );
 }
 
 // ===========================================

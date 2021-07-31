@@ -5,44 +5,28 @@ const { generateJWT } = require('../helpers/jwt');
 // ===========================================
 // ============== GET users ==============
 // ===========================================
-const getUsers = (req, res) => {
+const getUsers = async (req, res) => {
 
-    var from = req.query.from || 0;
-    var total = req.query.total || 5;
+    const from = Number(req.query.from) || 0;
+    const limit = Number(req.query.total) || 5;
 
-    from = Number(from);
-    total = Number(total);
+    try {
+        const [users, total] = await Promise.all([ // Se usa el promise.all para que empiece a resolver las promesas de manera simultanea
+            User.find().skip(from).limit(limit),
+            User.countDocuments()
+        ]);
 
-    User.find({}, 'name email image role')
-        .skip(from)
-        .limit(total)
-        .exec(
-            (err, users) => {
-                if(err) {
-                    return res.status(500).json({
-                        ok: false,
-                        message: 'Error loading users',
-                        errors: err
-                    });
-                }
-
-                User.countDocuments({}, (err, counter) => {
-                    if(err) {
-                        return res.status(500).json({
-                            ok: false,
-                            message: 'Error en el contador',
-                            errors: err
-                        });
-                    }
-
-                    res.status(200).json({
-                        ok: true,
-                        users: users,
-                        total: counter
-                    });
-                });
-            }
-        );
+        res.json({
+            ok: true,
+            users,
+            total
+        })
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            msg: "Ha ocurrido un error inesperado"
+        })
+    }
 }
 
 // ===========================================

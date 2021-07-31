@@ -3,46 +3,62 @@ const Doctor = require('../models/doctor');
 // ===========================================
 // ============ GET all doctors ==============
 // ===========================================
-const getDoctors = (req, res) => {
+const getDoctors = async (req, res) => {
 
-    var from = req.query.from || 0;
-    var total = req.query.total || 5;
+    try {
+        const doctors = 
+            await Doctor.find()
+                        .populate('user', 'name image')
+                        .populate('hospital', 'name');
+        res.json({
+            ok: true,
+            doctors
+        })
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            msg: "Ha ocurrido un error inesperado"
+        })
+    }
 
-    from = Number(from);
-    total = Number(total);
+    // var from = req.query.from || 0;
+    // var total = req.query.total || 5;
 
-    Doctor.find({})
-    .skip(from)
-    .limit(total)
-    .populate('user', 'name email')
-    .populate('hospital', 'name')
-    .exec(
-        (err, doctors) => {
-            if(err) {
-                return res.status(500).json({
-                    ok: false,
-                    message: 'Error encontrando los doctores',
-                    errors: err
-                });
-            }
+    // from = Number(from);
+    // total = Number(total);
 
-            Doctor.countDocuments({}, (err, counter) => {
-                if(err) {
-                    return res.status(500).json({
-                        ok: false,
-                        message: 'Error en el contador',
-                        errors: err
-                    });
-                }
+    // Doctor.find({})
+    // .skip(from)
+    // .limit(total)
+    // .populate('user', 'name email')
+    // .populate('hospital', 'name')
+    // .exec(
+    //     (err, doctors) => {
+    //         if(err) {
+    //             return res.status(500).json({
+    //                 ok: false,
+    //                 message: 'Error encontrando los doctores',
+    //                 errors: err
+    //             });
+    //         }
 
-                res.status(200).json({
-                    ok: true,
-                    doctors: doctors,
-                    total: counter
-                });
-            });
-        }
-    );
+    //         Doctor.countDocuments({}, (err, counter) => {
+    //             if(err) {
+    //                 return res.status(500).json({
+    //                     ok: false,
+    //                     message: 'Error en el contador',
+    //                     errors: err
+    //                 });
+    //             }
+
+    //             res.status(200).json({
+    //                 ok: true,
+    //                 doctors: doctors,
+    //                 total: counter
+    //             });
+    //         });
+    //     }
+    // );
 }
 
 // ===========================================
