@@ -89,7 +89,20 @@ const loginGoogle = async (req, res) => {
     }
 }
 
+const renewToken = async (req, res) => {
+
+    const uid = req.uid;
+    const token = await generateJWT(uid);
+    
+    res.json({
+        ok: true,
+        token
+    });
+    
+}
+
 module.exports = {
     login,
-    loginGoogle
+    loginGoogle,
+    renewToken
 }

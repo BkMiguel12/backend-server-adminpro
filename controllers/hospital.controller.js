@@ -21,43 +21,6 @@ const getHospitals = async (req, res) => {
             msg: "Ha ocurrido un error inesperado"
         })
     }
-    // var from = req.query.from || 0;
-    // var total = req.query.total || 5;
-
-    // from = Number(from);
-    // total = Number(total);
-
-    // Hospital.find({})
-    //     .skip(from)
-    //     .limit(total)
-    //     .populate('user', 'name email') 
-    //     .exec(
-    //         (err, hospitals) => {
-    //             if(err) {
-    //                 return res.status(500).json({
-    //                     ok: false,
-    //                     message: 'Error buscando los hospitales',
-    //                     errors: err
-    //                 });
-    //             }
-
-    //             Hospital.countDocuments({}, (err, counter) => {
-    //                 if(err) {
-    //                     return res.status(500).json({
-    //                         ok: false,
-    //                         message: 'Error en el contador',
-    //                         errors: err
-    //                     });
-    //                 }
-
-    //                 res.status(200).json({
-    //                     ok: true,
-    //                     hospitals: hospitals,
-    //                     total: counter
-    //                 });
-    //             })
-    //         }
-    //     );
 }
 
 // ===========================================
@@ -92,75 +55,71 @@ const createHospital = async (req, res) => {
 // ===========================================
 // ========== PUT - Edit Hospital ============
 // ===========================================
-const editHospital = (req, res) => {
+const editHospital = async (req, res) => {
     const id = req.params.id;
-    const body = req.body;
+    const userID = req.uid;
 
-    Hospital.findById(id, (err, hospital) => {
-        if(err) {
-             return res.status(500).json({
-                ok: false,
-                message: 'Error buscando el hospital',
-                errors: err
-            });
-        }
+    try {
+        const hospital = await Hospital.findById(id);
 
         if(!hospital) {
-             return res.status(400).json({
+            return res.status(404).json({
                 ok: false,
-                message: 'Error encontrando el hospital',
-                errors: {message: 'El hospital con el ID: ' + id + ' no existe'}
-            });
+                msg: "Hospital no encontrado por ID"
+            })
         }
 
-        hospital.name = body.name;
-        hospital.user = req.user._id
+        const changes = {
+            ...req.body,
+            user: userID
+        }
 
-        hospital.save((err, updatedHospital) => {
-            if(err) {
-                 return res.status(500).json({
-                    ok: false,
-                    message: 'Error buscando el hospital',
-                    errors: err
-                });
-            }
+        const updatedHospital = await Hospital.findByIdAndUpdate(id, changes, { new: true });
 
-            res.status(200).json({
-                ok: true,
-                hospital: updatedHospital
-            });
+        res.json({
+            ok: true,
+            hopsital: updatedHospital
         })
-    })
+
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            ok: false,
+            msg: "Ha ocurrido un error inesperado"
+        })
+    }
 }
 
 // ===========================================
 // =========== DELETE a Hospital =============
 // ===========================================
-const deleteHospital = (req, res) => {
+const deleteHospital = async (req, res) => {
     const id = req.params.id;
 
-    Hospital.findByIdAndRemove(id, (err, deletedHospital) => {
-        if(err) {
-            return res.status(500).json({
-               ok: false,
-               message: 'Error eliminando el hospital',
-               errors: err
-           });
-       }
+    try {
 
-       if(!deletedHospital) {
-            return res.status(400).json({
+        const hospital = await Hospital.findById(id);
+
+        if(!hospital) {
+            return res.status(404).json({
                 ok: false,
-                message: 'No existe el usuario!',
-                errors: {message: 'El hospital con el ID: ' + id + ' no existe'}
+                msg: "Hospital no encontrado por ID"
             });
-       }
+        }
 
-       res.status(200).json({
-           ok: true,
-           hospital: deletedHospital
-       });
-    });
+        await Hospital.findByIdAndDelete(id);
+
+        res.json({
+            ok: true,
+            msg: "Hospital eliminado"
+        })
+        
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            msg: "Ha ocurrido un error inesperado"
+        })
+    }
 }
 
 module.exports = {

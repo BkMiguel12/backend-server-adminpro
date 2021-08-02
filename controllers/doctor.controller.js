@@ -20,45 +20,6 @@ const getDoctors = async (req, res) => {
             msg: "Ha ocurrido un error inesperado"
         })
     }
-
-    // var from = req.query.from || 0;
-    // var total = req.query.total || 5;
-
-    // from = Number(from);
-    // total = Number(total);
-
-    // Doctor.find({})
-    // .skip(from)
-    // .limit(total)
-    // .populate('user', 'name email')
-    // .populate('hospital', 'name')
-    // .exec(
-    //     (err, doctors) => {
-    //         if(err) {
-    //             return res.status(500).json({
-    //                 ok: false,
-    //                 message: 'Error encontrando los doctores',
-    //                 errors: err
-    //             });
-    //         }
-
-    //         Doctor.countDocuments({}, (err, counter) => {
-    //             if(err) {
-    //                 return res.status(500).json({
-    //                     ok: false,
-    //                     message: 'Error en el contador',
-    //                     errors: err
-    //                 });
-    //             }
-
-    //             res.status(200).json({
-    //                 ok: true,
-    //                 doctors: doctors,
-    //                 total: counter
-    //             });
-    //         });
-    //     }
-    // );
 }
 
 // ===========================================
@@ -93,77 +54,70 @@ const createDoctor = async (req, res) => {
 // ===========================================
 // ========== PUT - Edit a Doctor ============
 // ===========================================
-const editDoctor = (req, res) => {
-    var id = req.params.id;
-    var body = req.body;
+const editDoctor = async (req, res) => {
+    const id = req.params.id;
+    const userID = req.uid;
+    const body = req.body;
 
-    Doctor.findById(id, (err, doctor) => {
-        if(err) {
-            return res.status(500).json({
-                ok: false,
-                message: 'Error encontrando el doctor',
-                errors: err
-            });
-        }
+    try {
+        const doctor = await Doctor.findById(id);
 
         if(!doctor) {
-            return res.status(400).json({
+            return res.status(404).json({
                 ok: false,
-                message: 'Error encontrando el doctor',
-                errors: {message: 'El doctor con el ID: ' + id + ' no existe'}
+                msg: "Doctor no encontrado por ID"
             });
         }
 
-        doctor.name = body.name;
-        doctor.user = req.user._id;
-        doctor.hospital = body.hospital;
+        const changes = {
+            ...body,
+            user: userID
+        }
 
-        doctor.save((err, updatedDoctor) => {
-            if(err) {
-                return res.status(500).json({
-                    ok: false,
-                    message: 'Error actualizando el doctor',
-                    errors: err
-                });
-            }
+        const updatedDoctor = await Doctor.findByIdAndUpdate(id, changes, { new: true });
 
-            res.status(200).json({
-                ok: true,
-                doctor: updatedDoctor
-            });
+        res.json({
+            ok: true,
+            doctor: updatedDoctor
         });
-
-    });
+        
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            msg: "Ha ocurrido un error inesperado"
+        })
+    }
 }
 
 // ===========================================
 // ============ DELETE a doctor ==============
 // ===========================================
-const deleteDoctor = (req, res) => {
-    var id = req.params.id;
-
-    Doctor.findByIdAndRemove(id, (err, deletedDoctor) => {
-        if(err) {
-            return res.status(500).json({
+const deleteDoctor = async (req, res) => {
+    const id = req.params.id;
+    
+    try {
+        const doctor = await Doctor.findById(id);
+    
+        if(!doctor) {
+            return res.status(404).json({
                 ok: false,
-                message: 'Error borrando doctor',
-                errors: err
+                msg: "Doctor no encontrado por ID"
             });
         }
 
-        if(!deletedDoctor) {
-            return res.status(400).json({
-                ok: false,
-                message: 'Error encontrando el doctor',
-                errors: {message: 'El doctor con el ID: ' + id + ' no existe'}
-            });
-        }
+        await Doctor.findByIdAndDelete(id);
 
-        res.status(200).json({
+        res.json({
             ok: true,
-            doctor: deletedDoctor
+            msg: "Doctor eliminado!"
+        })
+        
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            msg: "Ha ocurrido un error inesperado"
         });
-    });
+    }
 }
 
 module.exports = {
