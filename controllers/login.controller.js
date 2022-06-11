@@ -34,6 +34,7 @@ const login = async (req, res) => {
         res.json({
             ok: true,
             msg: 'Login satisfactorio',
+            user: dbUser,
             token
         });
     } catch(err){
@@ -78,7 +79,8 @@ const loginGoogle = async (req, res) => {
         res.json({
             ok: true,
             msg: 'Todo bien google login',
-            token
+            token,
+            user
         });
     } catch (err) {
         console.log(err);
