@@ -109,7 +109,14 @@ const putUser = (req, res) => {
       }
     }
 
-    fields.email = email;
+    if(!user.google) {
+      fields.email = email;
+    } else if (user.email !== email) {
+      return res.status(400).json({
+        ok: false,
+        msg: "Los usuarios de google no pueden cambiar su correo",
+      });
+    }
 
     res.json({
       ok: true,
